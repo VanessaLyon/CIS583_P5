@@ -35,7 +35,7 @@ def getContractInfo(chain):
         Load the contract_info file into a dictinary
         This function is used by the autograder and will likely be useful to you
     """
-    p = Path(__file__).with_name(contract_info)
+    p = Path(__file__).with_name(contract_info.json)
     try:
         with p.open('r')  as f:
             contracts = json.load(f)
