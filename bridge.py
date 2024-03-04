@@ -120,12 +120,7 @@ def blockScanner_source(chain,start_block,end_block,source_contract,destination_
             print(f"Deposit event found: token={token}, recipient={recipient}, amount={amount}")
         
             # Call the wrap function on the destination contract
-            txn = destination_contract.functions.wrap(token, recipient, amount).buildTransaction({
-               'from': acct.address, # default_account
-               'nonce': w3.eth.getTransactionCount(acct.address),
-               'gas': 2000000,
-               'gasPrice': w3.eth.gas_price
-            })
+            txn = destination_contract.functions.wrap(token, recipient, amount)
 		
             signed_txn = w3.eth.sign_transaction(txn, private_key=private_key)
             txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
@@ -143,12 +138,7 @@ def blockScanner_source(chain,start_block,end_block,source_contract,destination_
                 print(f"Deposit event found: token={token}, recipient={recipient}, amount={amount}")
         
                 # Call the wrap function on the destination contract
-                txn = destination_contract.functions.wrap(token, recipient, amount).buildTransaction({
-                   'from': acct.address, # default_account
-                   'nonce': w3.eth.getTransactionCount(acct.address),
-                   'gas': 2000000,
-                   'gasPrice': w3.eth.gas_price
-                })
+                txn = destination_contract.functions.wrap(token, recipient, amount)
 
                 signed_txn = w3.eth.sign_transaction(txn, private_key=private_key)
                 txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
