@@ -218,7 +218,7 @@ def blockScanner_destination(chain,start_block,end_block,source_contract,destina
     if end_block - start_block < 30:
 
         # Listen for "Unwrap" events on the destination contract
-        unwrap_event_filter = destination_contract.events.Unwrap.create_filter(fromBlock=from_block, toBlock=to_block)
+        unwrap_event_filter = destination_contract.events.Unwrap.create_filter(fromBlock=start_block, toBlock=end_block)
         unwrap_events = unwrap_event_filter.get_all_entries()
 
         for event in unwrap_events:
@@ -318,7 +318,7 @@ def scanBlocks(chain):
     # Correctly calculate start_block and end_block
     current_block = w3.eth.block_number
 	
-    start_block = max(0, current_block - 5)  # Ensure start_block is not negative
+    start_block = min(0, current_block - 5)  # Ensure start_block is not negative
     end_block = current_block  # Use the current block number as end_block
 
     if chain == 'source':
