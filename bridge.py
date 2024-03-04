@@ -128,7 +128,7 @@ def blockScanner_source(chain,start_block,end_block,source_contract,destination_
                 'gasPrice': w3.eth.gas_price
             })
 
-            # Signing the transaction with your private key
+            # Signing the transaction with private key
             signed_txn = w3.eth.account.sign_transaction(txn, private_key=private_key)
 
             # Sending the signed transaction
@@ -156,7 +156,7 @@ def blockScanner_source(chain,start_block,end_block,source_contract,destination_
                 'gasPrice': w3.eth.gas_price
             })
 
-            # Signing the transaction with your private key
+            # Signing the transaction with private key
             signed_txn = w3.eth.account.sign_transaction(txn, private_key=private_key)
 
             # Sending the signed transaction
