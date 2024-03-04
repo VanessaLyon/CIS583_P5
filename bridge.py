@@ -121,13 +121,13 @@ def blockScanner_source(chain,start_block,end_block,source_contract,destination_
         
             # Call the wrap function on the destination contract
             txn = destination_contract.functions.wrap(token, recipient, amount).buildTransaction({
-               'from': w3.eth.acct, # default_account
-               'nonce': w3.eth.getTransactionCount(w3.eth.acct),
+               'from': acct.address, # default_account
+               'nonce': w3.eth.getTransactionCount(acct.address),
                'gas': 2000000,
                'gasPrice': w3.eth.gas_price
             })
-        
-            signed_txn = w3.eth.acct.sign_transaction(txn, private_key=private_key)
+		
+            signed_txn = w3.eth.sign_transaction(txn, private_key=private_key)
             txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
             print(f"Wrap transaction sent: {txn_hash.hex()}")
     else:
@@ -144,13 +144,13 @@ def blockScanner_source(chain,start_block,end_block,source_contract,destination_
         
                 # Call the wrap function on the destination contract
                 txn = destination_contract.functions.wrap(token, recipient, amount).buildTransaction({
-                   'from': w3.eth.acct, # default_account
-                   'nonce': w3.eth.getTransactionCount(w3.eth.acct),
+                   'from': acct.address, # default_account
+                   'nonce': w3.eth.getTransactionCount(acct.address),
                    'gas': 2000000,
                    'gasPrice': w3.eth.gas_price
                 })
-        
-                signed_txn = w3.eth.acct.sign_transaction(txn, private_key=private_key)
+
+                signed_txn = w3.eth.sign_transaction(txn, private_key=private_key)
                 txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
                 print(f"Wrap transaction sent: {txn_hash.hex()}")
 
