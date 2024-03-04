@@ -86,12 +86,7 @@ def blockScanner_source(chain,start_block,end_block,source_contract,destination_
 
     arg_filter = {}
 
-	# Correctly calculate start_block and end_block
-    current_block = w3.eth.blockNumber
-    start_block = max(0, current_block - 5)  # Ensure start_block is not negative
-    end_block = current_block  # Use the current block number as end_block
-
-	# Correctly calculate start_block and end_block
+    # Correctly calculate start_block and end_block
     latest = w3.eth.get_block_number()
 
 
@@ -189,7 +184,7 @@ def blockScanner_destination(chain,start_block,end_block,source_contract,destina
 
     arg_filter = {}
 
-	# Correctly calculate start_block and end_block
+    # Correctly calculate start_block and end_block
     latest = w3.eth.get_block_number()
 
 
@@ -313,10 +308,10 @@ def scanBlocks(chain):
             abi=destination_contract_info['abi']
         )
 
-	# Correctly calculate start_block and end_block
-    	current_block = w3.eth.blockNumber
-    	start_block = max(0, current_block - 5)  # Ensure start_block is not negative
-    	end_block = current_block  # Use the current block number as end_block
+        # Correctly calculate start_block and end_block
+        current_block = w3.eth.blockNumber
+        start_block = max(0, current_block - 5)  # Ensure start_block is not negative
+        end_block = current_block  # Use the current block number as end_block
 
 
         if chain == 'source':
