@@ -269,11 +269,11 @@ def scanBlocks(chain):
         When Deposit events are found on the source chain, call the 'wrap' function the destination chain
         When Unwrap events are found on the destination chain, call the 'withdraw' function on the source chain
     """
-source_chain_api = 'https://api.avax-test.network/ext/bc/C/rpc'
-destination_chain_api = 'https://data-seed-prebsc-1-s1.binance.org:8545/'
-contract_info_path = "contract_info.json"
-source_chain_name = 'avax'
-destination_chain_name = 'bsc'
+    source_chain_api = 'https://api.avax-test.network/ext/bc/C/rpc'
+    destination_chain_api = 'https://data-seed-prebsc-1-s1.binance.org:8545/'
+    contract_info_path = "contract_info.json"
+    source_chain_name = 'avax'
+    destination_chain_name = 'bsc'
 
     if chain not in ['source','destination']:
         print( f"Invalid chain: {chain}" )
