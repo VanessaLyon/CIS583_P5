@@ -308,7 +308,20 @@ def scanBlocks(chain):
             abi=destination_contract_info['abi']
         )
 
-        # Correctly calculate start_block and end_block
+    if chain == 'avax':
+        api_url = f"https://api.avax-test.network/ext/bc/C/rpc" #AVAX C-chain testnet
+
+    if chain == 'bsc':
+        api_url = f"https://data-seed-prebsc-1-s1.binance.org:8545/" #BSC testnet
+
+    if chain in ['avax','bsc']:
+        w3 = Web3(Web3.HTTPProvider(api_url))
+        # inject the poa compatibility middleware to the innermost layer
+        w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+    else:
+        w3 = Web3(Web3.HTTPProvider(api_url))
+	
+	# Correctly calculate start_block and end_block
         current_block = w3.eth.blockNumber
         start_block = max(0, current_block - 5)  # Ensure start_block is not negative
         end_block = current_block  # Use the current block number as end_block
