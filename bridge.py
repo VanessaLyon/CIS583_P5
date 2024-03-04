@@ -283,8 +283,8 @@ def scanBlocks(chain):
 
     else:
         # Connect to both blockchains
-        source_w3 = connectTo(source_chain_api)
-        destination_w3 = connectTo(destination_chain_api)
+        source_w3 = connectTo(source_chain_name)
+        destination_w3 = connectTo(destination_chain_name)
 
         # Load contract information
         source_contract_info = getContractInfo('source')
