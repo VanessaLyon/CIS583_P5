@@ -111,6 +111,8 @@ def blockScanner_source(chain,start_block,end_block,source_contract,destination_
     if end_block - start_block < 30:
         event_filter = source_contract.events.Deposit.create_filter(fromBlock=start_block,toBlock=end_block,argument_filters=arg_filter)
         events = event_filter.get_all_entries()
+        from_address = acct.address  # The Ethereum address from which you're sending the transaction
+
         for event in events:
             token = event['args']['token']
             recipient = event['args']['recipient']
@@ -118,17 +120,29 @@ def blockScanner_source(chain,start_block,end_block,source_contract,destination_
             #tx_hash = event.transactionHash.hex()
             #address = contract_address
             print(f"Deposit event found: token={token}, recipient={recipient}, amount={amount}")
-        
-            # Call the wrap function on the destination contract
-            txn = destination_contract.functions.wrap(token, recipient, amount)
-		
-            signed_txn = w3.eth.sign_transaction(txn, private_key=private_key)
+
+
+            # Building the transaction with appropriate parameters
+            txn = destination_contract.functions.wrap(token, recipient, amount).buildTransaction({
+                'from': from_address,
+                'nonce': w3.eth.getTransactionCount(from_address),
+                'gas': 2000000,  # You may want to estimate this dynamically
+                'gasPrice': w3.eth.gas_price
+            })
+
+            # Signing the transaction with your private key
+            signed_txn = w3.eth.account.sign_transaction(txn, private_key=private_key)
+
+            # Sending the signed transaction
             txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
             print(f"Wrap transaction sent: {txn_hash.hex()}")
+
     else:
         for block_num in range(start_block,end_block+1):
             event_filter = source_contract.events.Deposit.create_filter(fromBlock=block_num,toBlock=block_num,argument_filters=arg_filter)
             events = event_filter.get_all_entries()
+            from_address = acct.address  # The Ethereum address from which you're sending the transaction
+
             for event in events:
                 token = event['args']['token']
                 recipient = event['args']['recipient']
@@ -136,11 +150,20 @@ def blockScanner_source(chain,start_block,end_block,source_contract,destination_
                 #tx_hash = event.transactionHash.hex()
                 #address = contract_address
                 print(f"Deposit event found: token={token}, recipient={recipient}, amount={amount}")
-        
-                # Call the wrap function on the destination contract
-                txn = destination_contract.functions.wrap(token, recipient, amount)
 
-                signed_txn = w3.eth.sign_transaction(txn, private_key=private_key)
+		    
+                # Building the transaction with appropriate parameters
+                txn = destination_contract.functions.wrap(token, recipient, amount).buildTransaction({
+                    'from': from_address,
+                    'nonce': w3.eth.getTransactionCount(from_address),
+                    'gas': 2000000,  # You may want to estimate this dynamically
+                    'gasPrice': w3.eth.gas_price
+                })
+
+                # Signing the transaction with your private key
+                signed_txn = w3.eth.account.sign_transaction(txn, private_key=private_key)
+
+                # Sending the signed transaction
                 txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
                 print(f"Wrap transaction sent: {txn_hash.hex()}")
 
