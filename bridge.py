@@ -111,8 +111,7 @@ def blockScanner_source(chain,start_block,end_block,source_contract,destination_
     if end_block - start_block < 30:
         event_filter = source_contract.events.Deposit.create_filter(fromBlock=start_block,toBlock=end_block,argument_filters=arg_filter)
         events = event_filter.get_all_entries()
-        from_address = acct.address  # The Ethereum address from which you're sending the transaction
-
+        
         for event in events:
             token = event['args']['token']
             recipient = event['args']['recipient']
@@ -121,12 +120,11 @@ def blockScanner_source(chain,start_block,end_block,source_contract,destination_
             #address = contract_address
             print(f"Deposit event found: token={token}, recipient={recipient}, amount={amount}")
 
-
             # Building the transaction with appropriate parameters
-            txn = destination_contract.functions.wrap(token, recipient, amount).buildTransaction({
-                'from': from_address,
-                'nonce': w3.eth.getTransactionCount(from_address),
-                'gas': 2000000,  # You may want to estimate this dynamically
+            txn = destination_contract.functions.wrap(token, recipient, amount).build_transaction({
+                'from': acct.address,
+                'nonce': w3.eth.get_transaction_count(acct.address),
+                'gas': 2000000,  
                 'gasPrice': w3.eth.gas_price
             })
 
@@ -134,15 +132,14 @@ def blockScanner_source(chain,start_block,end_block,source_contract,destination_
             signed_txn = w3.eth.account.sign_transaction(txn, private_key=private_key)
 
             # Sending the signed transaction
-            txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+            txn_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
             print(f"Wrap transaction sent: {txn_hash.hex()}")
 
     else:
         for block_num in range(start_block,end_block+1):
             event_filter = source_contract.events.Deposit.create_filter(fromBlock=block_num,toBlock=block_num,argument_filters=arg_filter)
             events = event_filter.get_all_entries()
-            from_address = acct.address  # The Ethereum address from which you're sending the transaction
-
+            
             for event in events:
                 token = event['args']['token']
                 recipient = event['args']['recipient']
@@ -151,21 +148,20 @@ def blockScanner_source(chain,start_block,end_block,source_contract,destination_
                 #address = contract_address
                 print(f"Deposit event found: token={token}, recipient={recipient}, amount={amount}")
 
-		    
-                # Building the transaction with appropriate parameters
-                txn = destination_contract.functions.wrap(token, recipient, amount).buildTransaction({
-                    'from': from_address,
-                    'nonce': w3.eth.getTransactionCount(from_address),
-                    'gas': 2000000,  # You may want to estimate this dynamically
-                    'gasPrice': w3.eth.gas_price
-                })
+	    # Building the transaction with appropriate parameters
+            txn = destination_contract.functions.wrap(token, recipient, amount).build_transaction({
+                'from': acct.address,
+                'nonce': w3.eth.get_transaction_count(acct.address),
+                'gas': 2000000,  
+                'gasPrice': w3.eth.gas_price
+            })
 
-                # Signing the transaction with your private key
-                signed_txn = w3.eth.account.sign_transaction(txn, private_key=private_key)
+            # Signing the transaction with your private key
+            signed_txn = w3.eth.account.sign_transaction(txn, private_key=private_key)
 
-                # Sending the signed transaction
-                txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
-                print(f"Wrap transaction sent: {txn_hash.hex()}")
+            # Sending the signed transaction
+            txn_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+            print(f"Wrap transaction sent: {txn_hash.hex()}")
 
 
 def blockScanner_destination(chain,start_block,end_block,source_contract,destination_contract):
@@ -229,28 +225,25 @@ def blockScanner_destination(chain,start_block,end_block,source_contract,destina
           # Extract necessary information from the event
           wrapped_token, recipient, amount = event['args'].values()
           
-          
           # Prepare the transaction for calling the `withdraw` function
-          txn_dict = source_contract.functions.withdraw(wrapped_token, recipient, amount).buildTransaction({
-            'from': w3_source.eth.acct,  
-            'nonce': w3_source.eth.getTransactionCount(w3_source.eth.acct),
+          txn_dict = source_contract.functions.withdraw(wrapped_token, recipient, amount).build_transaction({
+            'from': w3_source.eth.acct.address,  
+            'nonce': w3_source.eth.get_transaction_count(w3_source.eth.acct.address),
             'gas': 2000000,  
             'gasPrice': w3_source.eth.gas_price  
           })
 
           # Sign the transaction with the private key of the account
-          signed_txn = w3_source.eth.acct.sign_transaction(txn_dict, private_key=private_key)
+          signed_txn = w3_source.eth.account.sign_transaction(txn_dict, private_key=private_key)
 
           # Send the signed transaction
-          txn_receipt = w3_source.eth.sendRawTransaction(signed_txn.rawTransaction)
+          txn_receipt = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
 
           # Wait for the transaction to be mined and get the transaction receipt
           txn_receipt = w3_source.eth.wait_for_transaction_receipt(txn_receipt)
 
           print(f"Withdraw transaction successful with tx hash: {txn_receipt.transactionHash.hex()}")
           
-
-
     else:
         for block_num in range(start_block,end_block+1):
             # Listen for "Unwrap" events on the destination contract
@@ -258,31 +251,30 @@ def blockScanner_destination(chain,start_block,end_block,source_contract,destina
             unwrap_events = unwrap_event_filter.get_all_entries()
 
             for event in unwrap_events:
-              # Extract necessary information from the event
-              wrapped_token, recipient, amount = event['args'].values()
+                # Extract necessary information from the event
+                wrapped_token, recipient, amount = event['args'].values()
         
-              # Call the withdraw function on the source contract
+                #Call the withdraw function on the source contract
           
-              # Prepare the transaction for calling the `withdraw` function
-              txn_dict = source_contract.functions.withdraw(wrapped_token, recipient, amount).buildTransaction({
-                'from': w3_source.eth.acct,  
-                'nonce': w3_source.eth.getTransactionCount(w3_source.eth.acct),
-                'gas': 2000000,  
-                'gasPrice': w3_source.eth.gas_price  
-              })
+                # Prepare the transaction for calling the `withdraw` function
+                txn_dict = source_contract.functions.withdraw(wrapped_token, recipient, amount).build_transaction({
+                    'from': w3_source.eth.acct.address,  
+                    'nonce': w3_source.eth.get_transaction_count(w3_source.eth.acct.address),
+                    'gas': 2000000,  
+                    'gasPrice': w3_source.eth.gas_price  
+                })
 
-              # Sign the transaction with the private key of the account
-              signed_txn = w3_source.eth.acct.sign_transaction(txn_dict, private_key=private_key)
+                # Sign the transaction with the private key of the account
+                signed_txn = w3_source.eth.account.sign_transaction(txn_dict, private_key=private_key)
 
-              # Send the signed transaction
-              txn_receipt = w3_source.eth.sendRawTransaction(signed_txn.rawTransaction)
+                # Send the signed transaction
+                txn_receipt = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
 
-              # Wait for the transaction to be mined and get the transaction receipt
-              txn_receipt = w3_source.eth.wait_for_transaction_receipt(txn_receipt)
+                # Wait for the transaction to be mined and get the transaction receipt
+                txn_receipt = w3_source.eth.wait_for_transaction_receipt(txn_receipt)
 
-              print(f"Withdraw transaction successful with tx hash: {txn_receipt.transactionHash.hex()}")
-
-
+                print(f"Withdraw transaction successful with tx hash: {txn_receipt.transactionHash.hex()}")
+          
 
 
 
