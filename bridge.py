@@ -18,16 +18,21 @@ destination_chain_name = 'bsc'
 
 
 def connectTo(chain):
+	
     w3 = None  # Initialize w3 to None to ensure it's always defined
+	
     if chain == 'avax':
         api_url = "https://api.avax-test.network/ext/bc/C/rpc"  # AVAX C-chain testnet
-    elif chain == 'bsc':
-        api_url = "https://data-seed-prebsc-1-s1.binance.org:8545/"  # BSC testnet
-
-    if chain in ['avax', 'bsc']:
-        w3 = Web3(Web3.HTTPProvider(api_url))
+	w3 = Web3(Web3.HTTPProvider(api_url))
         # inject the poa compatibility middleware to the innermost layer
         w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+	    
+    elif chain == 'bsc':
+        api_url = "https://data-seed-prebsc-1-s1.binance.org:8545/"  # BSC testnet
+	w3 = Web3(Web3.HTTPProvider(api_url))
+        # inject the poa compatibility middleware to the innermost layer
+        w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+
     
     if w3 is None:
         print(f"Unsupported chain: {chain}")
