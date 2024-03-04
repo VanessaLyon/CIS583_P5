@@ -65,6 +65,9 @@ def blockScanner_source(chain,start_block,end_block,source_contract,destination_
 	This function reads "Deposit" events from the specified contract, 
 	and writes information about the events to the file "deposit_logs.csv"
     """
+    w3 = None
+    api_url = None
+	
     if chain == 'avax':
         api_url = f"https://api.avax-test.network/ext/bc/C/rpc" #AVAX C-chain testnet
 
@@ -273,63 +276,46 @@ def blockScanner_destination(chain,start_block,end_block,source_contract,destina
 
 def scanBlocks(chain):
     """
-        chain - (string) should be either "source" or "destination"
-        Scan the last 5 blocks of the source and destination chains
-        Look for 'Deposit' events on the source chain and 'Unwrap' events on the destination chain
-        When Deposit events are found on the source chain, call the 'wrap' function the destination chain
-        When Unwrap events are found on the destination chain, call the 'withdraw' function on the source chain
+    chain - (string) should be either "source" or "destination"
+    Scan the last 5 blocks of the source and destination chains
+    Look for 'Deposit' events on the source chain and 'Unwrap' events on the destination chain
+    When Deposit events are found on the source chain, call the 'wrap' function on the destination chain
+    When Unwrap events are found on the destination chain, call the 'withdraw' function on the source chain
     """
-    source_chain_api = 'https://api.avax-test.network/ext/bc/C/rpc'
-    destination_chain_api = 'https://data-seed-prebsc-1-s1.binance.org:8545/'
-    contract_info_path = "contract_info.json"
-    source_chain_name = 'avax'
-    destination_chain_name = 'bsc'
-
-    if chain not in ['source','destination']:
-        print( f"Invalid chain: {chain}" )
+    if chain == 'source':
+        w3 = connectTo(source_chain_name)
+        chain_api = source_chain_api
+    elif chain == 'destination':
+        w3 = connectTo(destination_chain_name)
+        chain_api = destination_chain_api
+    else:
+        print(f"Invalid chain: {chain}")
         return
 
-    else:
-        # Connect to both blockchains
-        source_w3 = connectTo(source_chain_name)
-        destination_w3 = connectTo(destination_chain_name)
+    if w3 is None:
+        print(f"Failed to connect to the {chain} chain.")
+        return
 
-        # Load contract information
-        source_contract_info = getContractInfo('source')
-        destination_contract_info = getContractInfo('destination')
+    # Load contract information
+    source_contract_info = getContractInfo('source')
+    destination_contract_info = getContractInfo('destination')
 
-        # Create contract instances
-        source_contract = source_w3.eth.contract(
-            address=source_contract_info['address'],
-            abi=source_contract_info['abi']
-        )
-        destination_contract = destination_w3.eth.contract(
-            address=destination_contract_info['address'],
-            abi=destination_contract_info['abi']
-        )
+    # Create contract instances
+    source_contract = w3.eth.contract(
+        address=source_contract_info['address'],
+        abi=source_contract_info['abi']
+    )
+    destination_contract = w3.eth.contract(
+        address=destination_contract_info['address'],
+        abi=destination_contract_info['abi']
+    )
 
-    if chain == 'avax':
-        api_url = f"https://api.avax-test.network/ext/bc/C/rpc" #AVAX C-chain testnet
+    # Correctly calculate start_block and end_block
+    current_block = w3.eth.blockNumber
+    start_block = max(0, current_block - 5)  # Ensure start_block is not negative
+    end_block = current_block  # Use the current block number as end_block
 
-    if chain == 'bsc':
-        api_url = f"https://data-seed-prebsc-1-s1.binance.org:8545/" #BSC testnet
-
-    if chain in ['avax','bsc']:
-        w3 = Web3(Web3.HTTPProvider(api_url))
-        # inject the poa compatibility middleware to the innermost layer
-        w3.middleware_onion.inject(geth_poa_middleware, layer=0)
-    else:
-        w3 = Web3(Web3.HTTPProvider(api_url))
-	
-	# Correctly calculate start_block and end_block
-        current_block = w3.eth.blockNumber
-        start_block = max(0, current_block - 5)  # Ensure start_block is not negative
-        end_block = current_block  # Use the current block number as end_block
-
-
-        if chain == 'source':
-          blockScanner_source(chain,start_block,end_block,source_contract, destination_contract)
-
-        else:
-          blockScanner_destination(chain,start_block,end_block,destination_contract, source_contract)
-  
+    if chain == 'source':
+        blockScanner_source(source_chain_name, start_block, end_block, source_contract, destination_contract)
+    elif chain == 'destination':
+        blockScanner_destination(destination_chain_name, start_block, end_block, source_contract, destination_contract)
