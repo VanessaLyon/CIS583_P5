@@ -318,7 +318,7 @@ def scanBlocks(chain):
     # Correctly calculate start_block and end_block
     current_block = w3.eth.block_number
 	
-    start_block = min(0, current_block - 5)  # Ensure start_block is not negative
+    start_block = min(1, current_block - 1)  # Ensure start_block is not negative
     end_block = current_block  # Use the current block number as end_block
 
     if chain == 'source':
